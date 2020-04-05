@@ -50,16 +50,34 @@ class Lox {
 
 	public static function error(data:ErrorData, message:String) {
 		switch data {
-			case Line(line): report(line, '', message);
-			case Token(token) if(token.type ==  Eof): report(token.line, ' at end', message);
-			case Token(token): report(token.line, ' at "${token.lexeme}"', message);
+			case Line(line): 
+				// report(line, '', message);
+				Sys.println("Error at [line " + line + "] Error" + "" + ": " + message);
+			case Token(token) if(token.type ==  Eof): 
+				// report(token.line, ' at end', message);
+				Sys.println("Error at end [EOF]" + ": " + message);
+			case Token(token): 
+				// report(token.line, ' at "${token.lexeme}"', message);
+				Sys.println("Error at [line " + token.line + "]" + ', ${token.lexeme}' + ": " + message);
+		}
+		hadError = true;
+	}
+
+	public static function warn(data:ErrorData, message:String) {
+		switch data {
+			case Line(line): 
+				Sys.println("Warning at [line " + line + "]" + "" + ": " + message);
+			case Token(token) if(token.type ==  Eof): 
+				Sys.println("Warning at end [EOF]" + ": " + message);
+			case Token(token): 
+				Sys.println("Warning at [line " + token.line + "]" + ', ${token.lexeme}' + ": " + message);
 		}
 	}
 
-	static function report(line:Int, where:String, message:String) {
-		Sys.println("[line " + line + "] Error" + where + ": " + message);
-		hadError = true;
-	}
+	// static function report(line:Int, where:String, message:String) {
+	// 	Sys.println("[line " + line + "] Error" + where + ": " + message);
+	// 	hadError = true;
+	// }
 
 	public static function runtimeError(e:RuntimeError) {
 		Sys.println('${e.message}\n[line ${e.token.line}]');

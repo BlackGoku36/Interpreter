@@ -26,6 +26,7 @@ class Scanner {
 		'true' => TokenType.True,
 		'let' => TokenType.Let,
 		'while' => TokenType.While,
+		'immut' => TokenType.Immut
 	];
 
 	public function new(source:String) {

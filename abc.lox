@@ -1,3 +1,5 @@
-let a;
-// a
-print(a);
+fn a(){
+    return 5;
+    print(4);
+}
+print(a());

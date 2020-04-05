@@ -22,6 +22,7 @@ enum TokenType {
 	Class; Else; False; Fn; For; If; Null;
 	Print; Return; Super; This; True; Let; While;
 	In; Break; Continue;
+	Immut;
 
 	Eof;
 }

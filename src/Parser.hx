@@ -122,6 +122,8 @@ class Parser {
 	}
 
 	function varDeclaration():Stmt {
+		var mutable:Bool = true;
+		if(match([Immut])) mutable = false;
 		var name = consume(Identifier, 'Expect variable name.');
 
 		var initializer = null;
@@ -129,7 +131,7 @@ class Parser {
 		if(match([Equal])) initializer = expression();
 
 		consume(Semicolon, 'Expect ";" after variable declaration.');
-		return Var(name, initializer);
+		return Var(name, initializer, mutable);
 	}
 
 	function assignment():Expr {
