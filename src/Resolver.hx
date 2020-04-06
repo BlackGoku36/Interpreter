@@ -23,7 +23,7 @@ class Resolver {
                 case Return(keyword, value): returnToken = keyword;
                 case _:
                     if (returnToken != null){
-                        Lox.warn(returnToken, 'Code is unreachable after "return" statement.');
+                        Lox.warn(returnToken, "Code is unreachable after 'return' statement.");
                         returnToken = null;
                     }
             }
@@ -38,16 +38,18 @@ class Resolver {
                 resolveStmts(statements);
                 endScope();
             case Var(name, init, mutable):
-                declare(name, mutable);
+                var varStmt:Stmt = Var(name, init, mutable);
+                declare(name, mutable, varStmt);
                 if(init!=null) resolveExpr(init);
-                define(name, mutable);
+                define(name, mutable, false, varStmt);
             case Function(name, params, body):
-                declare(name);
-                define(name);
+                var func:Stmt = Function(name, params, body);
+                declare(name, false, func);
+                define(name, false, true, func);
                 resolveFunction(name, params, body, Function);
             case Expression(e) | Print(e):
                 resolveExpr(e);
-                case If(cond, then, el):
+            case If(cond, then, el):
                 resolveExpr(cond);
                 resolveStmt(then);
                 if(el != null) resolveStmt(el);
@@ -60,8 +62,9 @@ class Resolver {
             case Break(keyword):
             case Continue(keyword):
             case For(name, from, to, body):
-                declare(name);
-                define(name);
+                var forStmt:Stmt = For(name, from, to, body);
+                declare(name, true, forStmt);
+                define(name, true, true, forStmt);
                 resolveExpr(from);
                 resolveExpr(to);
                 resolveStmts(body);
@@ -71,6 +74,8 @@ class Resolver {
     function resolveExpr(expr:Expr) {
 		return switch expr {
 			case Assign(name, op, value):
+                if(!scopes.isEmpty() && scopes.peek().exists(name.lexeme) && scopes.peek().get(name.lexeme).isReserved)
+                    Lox.error(name, 'Variable ${name.lexeme} is reserved for ${scopes.peek().get(name.lexeme).stmt.getName()} statement.');
                 if(!scopes.isEmpty() && scopes.peek().exists(name.lexeme) && !scopes.peek().get(name.lexeme).mutable)
 					Lox.error(name, 'Cannot re-assign immutable variable.');
 				resolveExpr(value);
@@ -98,8 +103,8 @@ class Resolver {
 		currentFunction = type;
 		beginScope();
 		for(param in params) {
-			declare(param);
-			define(param);
+			declare(param, true, Function(name, params, body));
+			define(param, true, true, Function(name, params, body));
 		}
 		resolveStmts(body);
 		endScope();
@@ -113,23 +118,24 @@ class Resolver {
 	function endScope() {
         var scope = scopes.pop();
         for(name => variable in scope){
-            if(variable.state.match(Defined))
-                Lox.warn(variable.name, "Local variable is not used");
+            if(variable.state.match(Defined)){
+                Lox.warn(variable.name, 'Local ${variable.stmt.getName()} is not used');
+            }
         }
     }
     
-    function declare(name:Token, mutable:Bool = true) {
+    function declare(name:Token, mutable:Bool = true, stmt:Stmt) {
 		if(scopes.isEmpty()) return;
 		var scope = scopes.peek();
 		if(scope.exists(name.lexeme)){
-            Lox.error(name, 'Variable with this name already declared in this scope.');
+            Lox.error(name, '${scope.get(name.lexeme).stmt.getName()} with this name already declared in this scope.');
         }
-		scope.set(name.lexeme, {name: name, state: Declared, mutable: mutable});
+		scope.set(name.lexeme, {name: name, state: Declared, mutable: mutable, isReserved: false, stmt: stmt});
 	}
 
-	function define(name:Token, mutable:Bool = true) {
+	function define(name:Token, mutable:Bool = true, isReserved:Bool = false, stmt:Stmt) {
 		if(scopes.isEmpty()) return;
-		scopes.peek().set(name.lexeme, {name: name, state: Defined, mutable: mutable});
+		scopes.peek().set(name.lexeme, {name: name, state: Defined, mutable: mutable, isReserved: isReserved, stmt: stmt});
     }
     
     function resolveLocal(expr:Expr, name:Token, isRead:Bool) {
@@ -164,6 +170,8 @@ typedef Variable = {
     var name:Token;
     var state: VariableState;
     var mutable:Bool;
+    var isReserved:Bool;
+    var stmt:Stmt;
 }
 
 enum VariableState {
