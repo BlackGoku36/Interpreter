@@ -1,5 +1,7 @@
 package;
 
+import haxe.display.Display.Literal;
+
 class Parser {
 	final tokens:Array<Token>;
 	var current = 0;
@@ -79,6 +81,8 @@ class Parser {
 
 	function forStatement():Stmt {
 		var name = null;
+		var step:Expr = Literal(1);
+		var reverse:Expr = Literal(false);
 
 		if(check(Identifier)){
 			name = consume(Identifier, 'Except variable name.');
@@ -89,9 +93,17 @@ class Parser {
 		consume(DotDot, 'Expect ".." between from and to numbers.');
 		var to = expression();
 
+		if(match([Colon])){
+			step = expression();
+
+			if(match([Colon])){
+				reverse = expression();
+			}
+		}
+
 		consume(LeftBrace, 'Expect "{" before loop body.');
 		var body = block();
-		return For(name, from, to, body);
+		return For(name, from, to, step, reverse, body);
 	}
 
 	function ifStatement():Stmt {

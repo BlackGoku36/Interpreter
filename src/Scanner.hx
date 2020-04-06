@@ -53,6 +53,7 @@ class Scanner {
 			case "-": addToken(match("=") ? MinusEqual : Minus);
 			case "+": addToken(match("=") ? PlusEqual : Plus);
 			case ";": addToken(Semicolon);
+			case ":": addToken(Colon);
 			case "*": addToken(match("=") ? StarEqual : Star);
 			case "!": addToken(match('=') ? BangEqual : Bang);
 			case "=": addToken(match('=') ? EqualEqual : Equal);

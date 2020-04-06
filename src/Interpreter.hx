@@ -1,5 +1,6 @@
 package;
 
+import SpecialIterator;
 import TokenType;
 
 class Interpreter {
@@ -50,12 +51,14 @@ class Interpreter {
 						}catch(err:Continue){}
 					}
 				}catch(err:Break){}
-			case For(name, from, to, body):
+			case For(name, from, to, steps, reverse, body):
 				var fromVal = evalute(from);
 				var toVal = evalute(to);
+				var stepsVal = evalute(steps);
+				var revVal = evalute(reverse);
 				var env = new Environment();
 				try {
-                    for (counter in (fromVal :Int)...(toVal :Int)) {
+                    for (counter in new SpecialIterator((fromVal :Int), (toVal :Int), (stepsVal:Int), (revVal:Bool))) {
 						if(name != null) env.define(name.lexeme, counter);
 						try {
 							executeBlock(body, env);

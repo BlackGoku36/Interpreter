@@ -61,12 +61,14 @@ class Resolver {
                 resolveStmt(body);
             case Break(keyword):
             case Continue(keyword):
-            case For(name, from, to, body):
-                var forStmt:Stmt = For(name, from, to, body);
+            case For(name, from, to, steps, reverse, body):
+                var forStmt:Stmt = For(name, from, to, steps, reverse, body);
                 declare(name, true, forStmt);
                 define(name, true, true, forStmt);
                 resolveExpr(from);
                 resolveExpr(to);
+                resolveExpr(steps);
+                resolveExpr(reverse);
                 resolveStmts(body);
         }
     }

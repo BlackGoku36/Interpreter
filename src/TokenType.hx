@@ -3,7 +3,7 @@ package;
 enum TokenType {
 	
 	LeftParen; RightParen; LeftBrace; RightBrace;
-	Comma; Dot; DotDot; Semicolon;
+	Comma; Dot; DotDot; Colon; Semicolon;
 
 	Minus; MinusEqual;
 	Plus; PlusEqual;
