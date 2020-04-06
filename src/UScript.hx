@@ -1,21 +1,22 @@
 import sys.io.File;
 import Scanner;
 
-class Lox {
+class UScript {
 
 	static final interpreter = new Interpreter();
 
 	static var hadError = false;
 	static var hadRuntimeError = false;
+	static var shouldWarn = true;
 
 	static function main() {
 		switch Sys.args(){
 			case []:
 				runPrompt();
-			case [v]:
-				runFile(v);
+			case [path]:
+				runFile(path);
 			case _:
-				Sys.println("Usage: hlox [script]");
+				Sys.println("Usage: UScript [script]");
 				Sys.exit(64);
 		}
 	}
@@ -29,6 +30,8 @@ class Lox {
 
 	static function runPrompt() {
 		var stdin = Sys.stdin();
+		shouldWarn = false;
+		Sys.println("~~~~UScript REPL~~~~~");
 		while(true) {
 			Sys.print('> ');
 			run(stdin.readLine());
@@ -50,34 +53,27 @@ class Lox {
 
 	public static function error(data:ErrorData, message:String) {
 		switch data {
-			case Line(line): 
-				// report(line, '', message);
+			case Line(line):
 				Sys.println("Error at [line " + line + "] Error" + "" + ": " + message);
-			case Token(token) if(token.type ==  Eof): 
-				// report(token.line, ' at end', message);
+			case Token(token) if(token.type ==  Eof):
 				Sys.println("Error at end [EOF]" + ": " + message);
-			case Token(token): 
-				// report(token.line, ' at "${token.lexeme}"', message);
+			case Token(token):
 				Sys.println("Error at [line " + token.line + "]" + ', ${token.lexeme}' + ": " + message);
 		}
 		hadError = true;
 	}
 
 	public static function warn(data:ErrorData, message:String) {
+		if(shouldWarn == false) return;
 		switch data {
-			case Line(line): 
+			case Line(line):
 				Sys.println("Warning at [line " + line + "]" + "" + ": " + message);
-			case Token(token) if(token.type ==  Eof): 
+			case Token(token) if(token.type ==  Eof):
 				Sys.println("Warning at end [EOF]" + ": " + message);
-			case Token(token): 
+			case Token(token):
 				Sys.println("Warning at [line " + token.line + "]" + ', ${token.lexeme}' + ": " + message);
 		}
 	}
-
-	// static function report(line:Int, where:String, message:String) {
-	// 	Sys.println("[line " + line + "] Error" + where + ": " + message);
-	// 	hadError = true;
-	// }
 
 	public static function runtimeError(e:RuntimeError) {
 		Sys.println('${e.message}\n[line ${e.token.line}]');

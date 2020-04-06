@@ -79,7 +79,7 @@ class Scanner {
 				} else if (isAlpha(c)) {
 					identifier();
 				} else {
-					Lox.error(line, "Unexpected character.");
+					UScript.error(line, "Unexpected character.");
 				}
 		}
 	}
@@ -129,7 +129,7 @@ class Scanner {
 		}
 
 		if(isAtEnd()) {
-			Lox.error(line, "Unterminated string.");
+			UScript.error(line, "Unterminated string.");
 			return;
 		}
 

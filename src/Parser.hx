@@ -331,7 +331,7 @@ class Parser {
 	}
 
 	function error(token:Token, message:String) {
-		Lox.error(token, message);
+		UScript.error(token, message);
 		return new ParserError();
 	}
 

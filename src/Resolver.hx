@@ -23,7 +23,7 @@ class Resolver {
                 case Return(keyword, value): returnToken = keyword;
                 case _:
                     if (returnToken != null){
-                        Lox.warn(returnToken, "Code is unreachable after 'return' statement.");
+                        UScript.warn(returnToken, "Code is unreachable after 'return' statement.");
                         returnToken = null;
                     }
             }
@@ -54,7 +54,7 @@ class Resolver {
                 resolveStmt(then);
                 if(el != null) resolveStmt(el);
             case Return(kw, val):
-                if(currentFunction == None) Lox.error(kw, 'Cannot return from top-level code.');
+                if(currentFunction == None) UScript.error(kw, 'Cannot return from top-level code.');
                 if(val != null) resolveExpr(val);
             case While(cond, body):
                 resolveExpr(cond);
@@ -77,14 +77,14 @@ class Resolver {
 		return switch expr {
 			case Assign(name, op, value):
                 if(!scopes.isEmpty() && scopes.peek().exists(name.lexeme) && scopes.peek().get(name.lexeme).isReserved)
-                    Lox.error(name, 'Variable ${name.lexeme} is reserved for ${scopes.peek().get(name.lexeme).stmt.getName()} statement.');
+                    UScript.error(name, 'Variable ${name.lexeme} is reserved for ${scopes.peek().get(name.lexeme).stmt.getName()} statement.');
                 if(!scopes.isEmpty() && scopes.peek().exists(name.lexeme) && !scopes.peek().get(name.lexeme).mutable)
-					Lox.error(name, 'Cannot re-assign immutable variable.');
+					UScript.error(name, 'Cannot re-assign immutable variable.');
 				resolveExpr(value);
 				resolveLocal(expr, name, false);
 			case Variable(name):
 				if(!scopes.isEmpty() && scopes.peek().exists(name.lexeme) && scopes.peek().get(name.lexeme).state.match(Declared))
-					Lox.error(name, 'Cannot read local variable in its own initializer');
+					UScript.error(name, 'Cannot read local variable in its own initializer');
 				resolveLocal(expr, name, true);
 			case Binary(left, _, right) | Logical(left, _, right):
 				resolveExpr(left);
@@ -121,7 +121,7 @@ class Resolver {
         var scope = scopes.pop();
         for(name => variable in scope){
             if(variable.state.match(Defined)){
-                Lox.warn(variable.name, 'Local ${variable.stmt.getName()} is not used');
+                UScript.warn(variable.name, 'Local ${variable.stmt.getName()} is not used');
             }
         }
     }
@@ -130,7 +130,7 @@ class Resolver {
 		if(scopes.isEmpty()) return;
 		var scope = scopes.peek();
 		if(scope.exists(name.lexeme)){
-            Lox.error(name, '${scope.get(name.lexeme).stmt.getName()} with this name already declared in this scope.');
+            UScript.error(name, '${scope.get(name.lexeme).stmt.getName()} with this name already declared in this scope.');
         }
 		scope.set(name.lexeme, {name: name, state: Declared, mutable: mutable, isReserved: false, stmt: stmt});
 	}

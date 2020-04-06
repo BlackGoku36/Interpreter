@@ -1,0 +1,23 @@
+let immut random = randRangeInt(0, 100);
+print(random);
+
+let won = false;
+
+let tries = 0;
+let maxTries = 5;
+
+while !won{
+	let inp = num(input("Enter your guess: "));
+	if inp == random{
+		print("You won!");
+		won = true;
+	}else{
+		tries += 1;
+		print("Try gain");
+		print("Tries left: "+ (maxTries - tries));
+		if tries == maxTries{
+			print("Your lose");
+			break
+		}
+	}
+}

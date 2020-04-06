@@ -16,6 +16,8 @@ class Interpreter {
 		globals = new Environment();
 		globals.define("clock", new ClockCallable());
 		globals.define("randRangeInt", new RandomRangeICallable());
+		globals.define("input", new InputCallable());
+		globals.define("num", new StringToNumCallable());
 		environment = globals;
 	}
 
@@ -23,7 +25,7 @@ class Interpreter {
 		try {
 			for(statement in statements) execute(statement);
 		} catch(e:RuntimeError) {
-			Lox.runtimeError(e);
+			UScript.runtimeError(e);
 		}
 	}
 
@@ -180,8 +182,12 @@ class Interpreter {
 							(left:Float) + (right:Float);
 						else if(Std.is(left, std.String) && Std.is(right, std.String))
 							(left:String) + (right:String);
+						else if(Std.is(left, Float) && Std.is(right, std.String))
+							(left:Float) + (right:String);
+						else if(Std.is(left, std.String) && Std.is(right, Float))
+							(left:String) + (right:Float);
 						else
-							throw new RuntimeError(op, 'Operands must be two numbers or two strings.');
+							throw new RuntimeError(op, 'Operands must be string or number.');
 					case Greater:
 						if(Std.is(left, Float) && Std.is(right, Float))
 							(left:Float) > (right:Float);
@@ -291,6 +297,25 @@ private class RandomRangeICallable implements Callable {
 	public function arity() return 2;
 	public function call(interpreter:Interpreter, args:Array<Any>):Any{
 		return Math.round( Math.random() * (cast(args[0], Int) - cast(args[1], Int)) + cast(args[1], Int));
+	}
+	public function toString() return '<native fn>';
+}
+
+private class InputCallable implements Callable {
+	public function new() {}
+	public function arity() return 1;
+	public function call(interpreter:Interpreter, args:Array<Any>):Any{
+		Sys.print(args[0]+" ");
+		return Sys.stdin().readLine();
+	}
+	public function toString() return '<native fn>';
+}
+
+private class StringToNumCallable implements Callable {
+	public function new() {}
+	public function arity() return 1;
+	public function call(interpreter:Interpreter, args:Array<Any>):Any{
+		return Std.parseInt(args[0]);
 	}
 	public function toString() return '<native fn>';
 }
